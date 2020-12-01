@@ -1,20 +1,20 @@
 pub mod day_one {
-    use crate::{file_to_vec, Solve, Test};
+    use crate::{file_to_vec, Solve};
 
     const TARGET: i32 = 2020;
-    pub struct DayOne {}
+    pub struct DayOne { data: Vec<i32> }
 
     impl DayOne {
-        fn get_data(&self, filename: &str) -> Vec<i32> {
-            file_to_vec(filename)
+        fn new(filename: &str) -> Self {
+            DayOne { data: file_to_vec(filename)
                 .iter()
                 .map(|val| val.parse::<i32>().unwrap())
-                .collect()
+                .collect(), }
         }
 
-        fn solve_one(&self, data: &Vec<i32>) -> i32 {
-            for (i, one) in data.iter().enumerate() {
-                for two in &(*data)[i + 1..] {
+        fn solve_one(&self) -> i32 {
+            for (i, one) in self.data.iter().enumerate() {
+                for two in &(*self.data)[i + 1..] {
                     if one + two == TARGET {
                         println!("Part one solved! {} {} -> {}", one, two, one * two);
                         return one * two;
@@ -25,10 +25,10 @@ pub mod day_one {
             panic!("No solution found for part one :-(");
         }
 
-        fn solve_two(&self, data: &Vec<i32>) -> i32 {
-            for (i, one) in data.iter().enumerate() {
-                for (j, two) in (&(*data)[i + 1..]).iter().enumerate() {
-                    for three in &(*data)[j + 1..] {
+        fn solve_two(&self) -> i32 {
+            for (i, one) in self.data.iter().enumerate() {
+                for (j, two) in (&(*self.data)[i + 1..]).iter().enumerate() {
+                    for three in &(*self.data)[j + 1..] {
                         if one + two + three == TARGET {
                             println!(
                                 "Part two solved! {} {} {} -> {}",
@@ -48,20 +48,23 @@ pub mod day_one {
     }
 
     impl Solve for DayOne {
-        fn solve(&self, _args: &Vec<String>) {
-            let data = self.get_data("data/1a.txt");
-            self.solve_one(&data);
-            self.solve_two(&data);
+        fn solve(_args: &Vec<String>) {
+            let day = DayOne::new("data/1a.txt");
+            day.solve_one();
+            day.solve_two();
         }
     }
 
-    impl Test for DayOne {
-        fn test(&self, _args: &Vec<String>) {
-            let data = self.get_data("data/1a_example.txt");
+    #[cfg(test)]
+    mod tests {
+        use super::*;
 
-            println!("Data:\n{:?}", data);
-            assert!(self.solve_one(&data) == 514579);
-            assert!(self.solve_two(&data) == 241861950);
+        #[test]
+        fn test() {
+            let day = DayOne::new("data/1a_example.txt");
+
+            assert!(day.solve_one() == 514579);
+            assert!(day.solve_two() == 241861950);
         }
     }
 }

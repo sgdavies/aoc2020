@@ -6,14 +6,13 @@ use crate::day_one::day_one::DayOne;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("Hello, world!\n{:?}", args);
+    println!("Hello, world! {:?}", args);
 
-    let puzzle = DayOne {};
-    puzzle.solve(&args);
+    DayOne::solve(&args);
 }
 
 pub trait Solve {
-    fn solve(&self, args: &Vec<String>);
+    fn solve(args: &Vec<String>);
 }
 
 pub trait Test {
