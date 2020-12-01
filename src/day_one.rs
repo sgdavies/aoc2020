@@ -2,14 +2,22 @@ pub mod day_one {
     use crate::{file_to_vec, Solve};
 
     const TARGET: i32 = 2020;
-    pub struct DayOne { data: Vec<i32> }
+    pub struct DayOne {
+        data: Vec<i32>,
+    }
 
     impl DayOne {
         fn new(filename: &str) -> Self {
-            DayOne { data: file_to_vec(filename)
-                .iter()
-                .map(|val| val.parse::<i32>().unwrap())
-                .collect(), }
+            DayOne {
+                data: file_to_vec(filename)
+                    .iter()
+                    .map(|val| val.parse::<i32>().unwrap())
+                    .collect(),
+            }
+        }
+
+        pub fn default() -> Self {
+            DayOne::new("data/1a.txt")
         }
 
         fn solve_one(&self) -> i32 {
@@ -48,10 +56,9 @@ pub mod day_one {
     }
 
     impl Solve for DayOne {
-        fn solve(_args: &Vec<String>) {
-            let day = DayOne::new("data/1a.txt");
-            day.solve_one();
-            day.solve_two();
+        fn solve(&self) {
+            self.solve_one();
+            self.solve_two();
         }
     }
 
