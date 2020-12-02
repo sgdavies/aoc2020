@@ -3,7 +3,12 @@ use std::env;
 use std::fs;
 
 mod day_one;
+mod day_two;
 use crate::day_one::day_one::DayOne;
+use crate::day_two::day_two::DayTwo;
+
+extern crate lazy_static;
+extern crate regex;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -11,6 +16,7 @@ fn main() {
 
     let mut days: BTreeMap<&str, Box<dyn Solve + Send + Sync>> = BTreeMap::new();
     days.insert("1", Box::new(DayOne::default()));
+    days.insert("2a", Box::new(DayTwo::default()));
 
     let days_to_test: Vec<&str> = match args.len() {
         0 => panic!("Expected at least name of target!"),
@@ -20,14 +26,14 @@ fn main() {
 
     for day in days_to_test {
         match days.get(day) {
-            Some(solver) => solver.solve(),
+            Some(solver) => println!("Day {} - {:?}", day, solver.solve()),
             None => panic!("No target for '{}'", day),
         };
     }
 }
 
 pub trait Solve {
-    fn solve(&self);
+    fn solve(&self) -> i32;
 }
 
 /// Utils

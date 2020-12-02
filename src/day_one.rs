@@ -56,9 +56,10 @@ pub mod day_one {
     }
 
     impl Solve for DayOne {
-        fn solve(&self) {
-            self.solve_one();
-            self.solve_two();
+        fn solve(&self) -> i32 {
+            let _a = self.solve_one();
+            let b =self.solve_two();
+            b
         }
     }
 
