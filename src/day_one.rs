@@ -1,5 +1,5 @@
 pub mod day_one {
-    use crate::{file_to_vec, Solve};
+    use crate::file_to_vec;
 
     const TARGET: i32 = 2020;
     pub struct DayOne {
@@ -20,7 +20,7 @@ pub mod day_one {
             DayOne::new("data/1a.txt")
         }
 
-        fn solve_one(&self) -> i32 {
+        pub fn solve_one(&self) -> i32 {
             for (i, one) in self.data.iter().enumerate() {
                 for two in &(*self.data)[i + 1..] {
                     if one + two == TARGET {
@@ -33,7 +33,7 @@ pub mod day_one {
             panic!("No solution found for part one :-(");
         }
 
-        fn solve_two(&self) -> i32 {
+        pub fn solve_two(&self) -> i32 {
             for (i, one) in self.data.iter().enumerate() {
                 for (j, two) in (&(*self.data)[i + 1..]).iter().enumerate() {
                     for three in &(*self.data)[j + 1..] {
@@ -52,14 +52,6 @@ pub mod day_one {
             }
 
             panic!("No solution found for part two :-(");
-        }
-    }
-
-    impl Solve for DayOne {
-        fn solve(&self) -> i32 {
-            let _a = self.solve_one();
-            let b =self.solve_two();
-            b
         }
     }
 

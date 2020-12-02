@@ -1,5 +1,5 @@
 pub mod template {
-    use crate::{file_to_vec, Solve};
+    use crate::file_to_vec;
 
     pub struct Template {}
 
@@ -11,11 +11,10 @@ pub mod template {
         pub fn default() -> Self {
             Template::new()
         }
-    }
 
-    impl Solve for Template {
-        fn solve(&self) {
+        fn solve(&self) -> i32 {
             // TODO
+            0
         }
     }
 
@@ -25,7 +24,8 @@ pub mod template {
 
         #[test]
         fn test() {
-            assert!(true);
+            template = Template::default();
+            assert!(template.solve() == 1);
         }
     }
 }

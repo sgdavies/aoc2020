@@ -2,7 +2,7 @@
 #[macro_use]
 
 pub mod day_two {
-    use crate::{file_to_vec, Solve};
+    use crate::file_to_vec;
     use lazy_static::lazy_static;
     use regex::Regex;
 
@@ -32,9 +32,18 @@ pub mod day_two {
             record
         }
 
-        fn valid(&self) -> bool {
+        fn valid_one(&self) -> bool {
             let count = self.password.chars().filter(|c| *c==self.letter).count();
             (self.min <= count) && (count <= self.max)
+        }
+
+        fn valid_two(&self) -> bool {
+            let chars: Vec<char> = self.password.chars().collect();
+            match (self.letter == chars[self.min-1], self.letter == chars[self.max-1]) {
+                (true, false) => true,
+                (false, true) => true,
+                _ => false,
+            }
         }
     }
 
@@ -53,14 +62,12 @@ pub mod day_two {
             DayTwo::new("data/2a.txt")
         }
 
-        fn valid_records(&self) -> i32 {
-            self.records.iter().filter(|r| r.valid()).count() as i32
+        pub fn valid_one(&self) -> i32 {
+            self.records.iter().filter(|r| r.valid_one()).count() as i32
         }
-    }
 
-    impl Solve for DayTwo {
-        fn solve(&self) -> i32 {
-            self.valid_records()
+        pub fn valid_two(&self) -> i32 {
+            self.records.iter().filter(|r| r.valid_two()).count() as i32
         }
     }
 
@@ -69,9 +76,15 @@ pub mod day_two {
         use super::*;
 
         #[test]
-        fn test() {
+        fn test_one() {
             let day = DayTwo::new("data/2a_example.txt");
-            assert!(day.valid_records() == 2);
+            assert!(day.valid_one() == 2);
+        }
+
+        #[test]
+        fn test_two() {
+            let day = DayTwo::new("data/2a_example.txt");
+            assert!(day.valid_two() == 1);
         }
     }
 }

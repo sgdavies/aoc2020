@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 
@@ -14,26 +13,21 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     println!("Hello, world! {:?}", args);
 
-    let mut days: BTreeMap<&str, Box<dyn Solve + Send + Sync>> = BTreeMap::new();
-    days.insert("1", Box::new(DayOne::default()));
-    days.insert("2a", Box::new(DayTwo::default()));
-
     let days_to_test: Vec<&str> = match args.len() {
         0 => panic!("Expected at least name of target!"),
-        1 => days.keys().cloned().collect(),
+        // 1 => days.keys().cloned().collect(), // List of all keys
         _ => args[1..].iter().map(AsRef::as_ref).collect(),
     };
 
     for day in days_to_test {
-        match days.get(day) {
-            Some(solver) => println!("Day {} - {:?}", day, solver.solve()),
-            None => panic!("No target for '{}'", day),
-        };
+        println!("Day {}: -> {:?}", day, match day {
+            "1a" => DayOne::default().solve_one(),
+            "1b" => DayOne::default().solve_two(),
+            "2a" => DayTwo::default().valid_one(),
+            "2b" => DayTwo::default().valid_two(),
+            _ => panic!("No target for '{}'", day),
+        });
     }
-}
-
-pub trait Solve {
-    fn solve(&self) -> i32;
 }
 
 /// Utils
