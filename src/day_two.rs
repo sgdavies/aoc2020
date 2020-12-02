@@ -37,14 +37,7 @@ impl Record {
 
     fn valid_two(&self) -> bool {
         let chars: Vec<char> = self.password.chars().collect();
-        match (
-            self.letter == chars[self.min - 1],
-            self.letter == chars[self.max - 1],
-        ) {
-            (true, false) => true,
-            (false, true) => true,
-            _ => false,
-        }
+        (self.letter == chars[self.min - 1]) ^ (self.letter == chars[self.max - 1])
     }
 }
 
