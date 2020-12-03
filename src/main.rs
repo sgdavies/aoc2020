@@ -1,7 +1,6 @@
 use std::env;
 use std::fs;
 
-mod template;
 mod day_one;
 mod day_two;
 mod day_three;

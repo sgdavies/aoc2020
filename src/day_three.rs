@@ -30,6 +30,14 @@ impl DayThree {
     }
 
     fn solve_for_slope(&self, xstep: usize, ystep: usize) -> u32 {
+        self.data.iter().step_by(ystep).enumerate().fold(0, |acc, (i, row)| acc + match row[(i as usize)*xstep %self.width] as char {
+            '#' => 1,
+            '.' => 0,
+            c => panic!("Unexpected char: {:?}", c),
+        })
+    }
+
+    fn _solve_for_slope_iter(&self, xstep: usize, ystep: usize) -> u32 {
         let mut count = 0;
         let mut x = 0;
         for row in (0..self.data.len()).step_by(ystep) {
