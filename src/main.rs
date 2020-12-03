@@ -2,11 +2,11 @@ use std::env;
 use std::fs;
 
 mod day_one;
-mod day_two;
 mod day_three;
+mod day_two;
 use crate::day_one::DayOne;
-use crate::day_two::DayTwo;
 use crate::day_three::DayThree;
+use crate::day_two::DayTwo;
 
 extern crate lazy_static;
 extern crate regex;
