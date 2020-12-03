@@ -1,17 +1,21 @@
 use crate::file_to_vec;
 
-pub struct Template {}
+pub struct Template {
+    _data: Vec<String>,
+}
 
 impl Template {
-    fn new() -> Self {
-        Template {}
+    fn new(filename: &str) -> Self {
+        Template {
+            _data: file_to_vec(filename),
+        }
     }
 
-    pub fn default() -> Self {
-        Template::new()
+    pub fn _default() -> Self {
+        Template::new("data/template.txt")
     }
 
-    fn solve(&self) -> i32 {
+    pub fn solve(&self) -> i32 {
         // TODO
         0
     }
@@ -23,7 +27,7 @@ mod tests {
 
     #[test]
     fn test() {
-        template = Template::default();
-        assert!(template.solve() == 1);
+        let template = Template::new("data/1a.txt");
+        assert!(template.solve() == 0);
     }
 }

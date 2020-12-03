@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 
+mod template;
 mod day_one;
 mod day_two;
 use crate::day_one::DayOne;
