@@ -4,8 +4,10 @@ use std::fs;
 mod template;
 mod day_one;
 mod day_two;
+mod day_three;
 use crate::day_one::DayOne;
 use crate::day_two::DayTwo;
+use crate::day_three::DayThree;
 
 extern crate lazy_static;
 extern crate regex;
@@ -22,13 +24,15 @@ fn main() {
 
     for day in days_to_test {
         println!(
-            "Day {}: -> {:?}",
+            "Day {}: -> {}",
             day,
             match day {
-                "1a" => DayOne::default().solve_one(),
-                "1b" => DayOne::default().solve_two(),
-                "2a" => DayTwo::default().valid_one(),
-                "2b" => DayTwo::default().valid_two(),
+                "1a" => DayOne::default().solve_one().to_string(),
+                "1b" => DayOne::default().solve_two().to_string(),
+                "2a" => DayTwo::default().valid_one().to_string(),
+                "2b" => DayTwo::default().valid_two().to_string(),
+                "3a" => DayThree::default().solve_one().to_string(),
+                "3b" => DayThree::default().solve_two().to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
