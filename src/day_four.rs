@@ -2,53 +2,74 @@ use std::collections::HashMap;
 use std::fs;
 
 pub struct DayFour {
-    filename: String,
+    passports: Vec<Passport>,
 }
 
 impl DayFour {
     fn new(filename: &str) -> Self {
-        DayFour {
-            filename: filename.to_string(),
-        }
+        let contents = fs::read_to_string(filename)
+            .unwrap_or_else(|_| panic!("Couldn't read file {}", filename));
+        let passports: Vec<Passport> = contents.split("\n\n").map(Passport::new).collect();
+
+        DayFour { passports }
     }
 
     pub fn default() -> Self {
         DayFour::new("data/4a.txt")
     }
 
-    pub fn solve_one(&self) -> i32 {
-        let contents = fs::read_to_string(&self.filename)
-            .unwrap_or_else(|_| panic!("Couldn't read file {}", self.filename));
-        let v: Vec<Vec<String>> = contents
-            .split("\n\n")
-            .map(|s| {
-                s.to_string()
-                    .split(|c| c == ' ' || c == '\n')
-                    .map(str::to_string)
-                    .collect()
-            })
-            .collect();
+    pub fn solve_one(&self) -> usize {
+        self.passports.iter().filter(|x| x.complete()).count()
+    }
+}
 
-        let v: Vec<HashMap<&str, &str>> = v
+struct Passport {
+    byr: Option<String>,
+    iyr: Option<String>,
+    eyr: Option<String>,
+    hgt: Option<String>,
+    hcl: Option<String>,
+    ecl: Option<String>,
+    pid: Option<String>,
+    _cid: Option<String>,
+}
+
+impl Passport {
+    fn new(definition: &str) -> Passport {
+        let mut fields: HashMap<String, String> = HashMap::new();
+        for s in definition
+            .to_string()
+            .split(|c| c == ' ' || c == '\n')
+            .map(str::to_string)
+            .collect::<Vec<String>>()
             .iter()
-            .map(|inner_vec| {
-                let mut map: HashMap<&str, &str> = HashMap::new();
-                for s in inner_vec.iter() {
-                    let parts: Vec<&str> = s.split(':').collect();
-                    map.insert(parts[0], parts[1]);
-                }
-                map
-            })
-            .collect();
+        {
+            let parts: Vec<&str> = s.split(':').collect();
+            fields.insert(parts[0].to_string(), parts[1].to_string());
+        }
 
-        let required_keys = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-        v.iter().fold(0, |acc, map| {
-            acc + if required_keys.iter().all(|&x| map.contains_key(x)) {
-                1
-            } else {
-                0
-            }
-        })
+        Passport {
+            byr: fields.get("byr").map(String::from),
+            iyr: fields.get("iyr").map(String::from),
+            eyr: fields.get("eyr").map(String::from),
+            hgt: fields.get("hgt").map(String::from),
+            hcl: fields.get("hcl").map(String::from),
+            ecl: fields.get("ecl").map(String::from),
+            pid: fields.get("pid").map(String::from),
+            _cid: fields.get("cid").map(String::from),
+        }
+    }
+
+    // Are all the necessary fields present (even if not valid?)
+    fn complete(&self) -> bool {
+        // All fields except 'cid'
+        self.byr.is_some()
+            && self.iyr.is_some()
+            && self.eyr.is_some()
+            && self.hgt.is_some()
+            && self.hcl.is_some()
+            && self.ecl.is_some()
+            && self.pid.is_some()
     }
 }
 
