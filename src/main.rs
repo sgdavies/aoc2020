@@ -1,9 +1,11 @@
 use std::env;
 use std::fs;
 
+mod day_four;
 mod day_one;
 mod day_three;
 mod day_two;
+use crate::day_four::DayFour;
 use crate::day_one::DayOne;
 use crate::day_three::DayThree;
 use crate::day_two::DayTwo;
@@ -32,6 +34,7 @@ fn main() {
                 "2b" => DayTwo::default().valid_two().to_string(),
                 "3a" => DayThree::default().solve_one().to_string(),
                 "3b" => DayThree::default().solve_two().to_string(),
+                "4a" => DayFour::default().solve_one().to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
