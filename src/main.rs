@@ -35,6 +35,7 @@ fn main() {
                 "3a" => DayThree::default().solve_one().to_string(),
                 "3b" => DayThree::default().solve_two().to_string(),
                 "4a" => DayFour::default().solve_one().to_string(),
+                "4b" => DayFour::default().solve_two().to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );

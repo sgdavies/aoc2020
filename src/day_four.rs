@@ -6,6 +6,8 @@ use regex::Regex;
 
 lazy_static! {
     static ref HEIGHT_RE: Regex = Regex::new(r"^(\d+)(in|cm)$").unwrap();
+    static ref HAIR_COLOR_RE: Regex = Regex::new(r"^#[0-9a-f]{6}$").unwrap();
+    static ref PID_RE: Regex = Regex::new(r"^[0-9]{9}$").unwrap();
 }
 
 pub struct DayFour {
@@ -137,21 +139,36 @@ fn check_hgt(hgt: Option<&String>) -> bool {
 
 fn check_hcl(hcl: Option<&String>) -> bool {
     match hcl {
-        Some(_hcl) => false, // TODO
+        Some(hcl) => match HAIR_COLOR_RE.captures(hcl) {
+            Some(_) => true,
+            None => false,
+        },
         None => false,
     }
 }
 
 fn check_ecl(ecl: Option<&String>) -> bool {
     match ecl {
-        Some(_ecl) => false, // TODO
+        Some(ecl) => match ecl.as_str() {
+            "amb" => true,
+            "blu" => true,
+            "brn" => true,
+            "gry" => true,
+            "grn" => true,
+            "hzl" => true,
+            "oth" => true,
+            _ => false,
+        },
         None => false,
     }
 }
 
 fn check_pid(pid: Option<&String>) -> bool {
     match pid {
-        Some(_pid) => false, // TODO
+        Some(pid) => match PID_RE.captures(pid) {
+            Some(_) => true,
+            None => false,
+        },
         None => false,
     }
 }
@@ -229,8 +246,8 @@ mod tests {
         assert!(check_ecl(Some(&"hzl".to_string())));
         assert!(check_ecl(Some(&"oth".to_string())));
 
-        assert!(check_ecl(Some(&"".to_string())));
-        assert!(check_ecl(Some(&"wat".to_string())));
+        assert!(!check_ecl(Some(&"".to_string())));
+        assert!(!check_ecl(Some(&"wat".to_string())));
     }
 
     #[test]
