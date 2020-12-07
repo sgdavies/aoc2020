@@ -1,6 +1,13 @@
 use std::collections::HashMap;
 use std::fs;
 
+use lazy_static::lazy_static;
+use regex::Regex;
+
+lazy_static! {
+    static ref HEIGHT_RE: Regex = Regex::new(r"^(\d+)(in|cm)$").unwrap();
+}
+
 pub struct DayFour {
     passports: Vec<Passport>,
 }
@@ -90,11 +97,15 @@ impl Passport {
 
 fn check_year(year: Option<&String>, earliest: u32, latest: u32) -> bool {
     match year {
-        Some(year) => match year.parse::<u32>() {
-            Ok(val) => earliest <= val && val <= latest,
-            Err(_) => false,
-        },
+        Some(year) => check_int_str(year, earliest, latest),
         None => false,
+    }
+}
+
+fn check_int_str(val: &str, lower: u32, upper: u32) -> bool {
+    match val.parse::<u32>() {
+        Ok(val) => lower <= val && val <= upper,
+        Err(_) => false,
     }
 }
 
@@ -112,7 +123,14 @@ fn check_eyr(eyr: Option<&String>) -> bool {
 
 fn check_hgt(hgt: Option<&String>) -> bool {
     match hgt {
-        Some(_hgt) => false, // TODO
+        Some(hgt) => match HEIGHT_RE.captures(hgt) {
+            Some(cap) => match &cap[2] {
+                "in" => check_int_str(&cap[1].to_string(), 59, 76),
+                "cm" => check_int_str(&cap[1].to_string(), 150, 193),
+                other => panic!("{:?}", other),
+            },
+            None => false,
+        },
         None => false,
     }
 }
