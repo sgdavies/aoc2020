@@ -4,11 +4,13 @@ use std::fs;
 mod day_five;
 mod day_four;
 mod day_one;
+mod day_six;
 mod day_three;
 mod day_two;
 use crate::day_five::{solve_5a, solve_5b};
 use crate::day_four::DayFour;
 use crate::day_one::DayOne;
+use crate::day_six::{solve_6a, solve_6b};
 use crate::day_three::DayThree;
 use crate::day_two::DayTwo;
 
@@ -40,6 +42,8 @@ fn main() {
                 "4b" => DayFour::default().solve_two().to_string(),
                 "5a" => solve_5a().to_string(),
                 "5b" => solve_5b().to_string(),
+                "6a" => solve_6a("data/6.txt").to_string(),
+                "6b" => solve_6b("data/6.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
