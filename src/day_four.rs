@@ -139,10 +139,7 @@ fn check_hgt(hgt: Option<&String>) -> bool {
 
 fn check_hcl(hcl: Option<&String>) -> bool {
     match hcl {
-        Some(hcl) => match HAIR_COLOR_RE.captures(hcl) {
-            Some(_) => true,
-            None => false,
-        },
+        Some(hcl) => HAIR_COLOR_RE.captures(hcl).is_some(),
         None => false,
     }
 }
@@ -165,10 +162,7 @@ fn check_ecl(ecl: Option<&String>) -> bool {
 
 fn check_pid(pid: Option<&String>) -> bool {
     match pid {
-        Some(pid) => match PID_RE.captures(pid) {
-            Some(_) => true,
-            None => false,
-        },
+        Some(pid) => PID_RE.captures(pid).is_some(),
         None => false,
     }
 }

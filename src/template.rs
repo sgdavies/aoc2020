@@ -15,7 +15,12 @@ impl Template {
         Template::new("data/template.txt")
     }
 
-    pub fn solve(&self) -> i32 {
+    pub fn solve_one(&self) -> i32 {
+        // TODO
+        0
+    }
+
+    pub fn solve_two(&self) -> i32 {
         // TODO
         0
     }
@@ -28,6 +33,6 @@ mod tests {
     #[test]
     fn test() {
         let template = Template::new("data/1a.txt");
-        assert!(template.solve() == 0);
+        assert!(template.solve_one() == 0);
     }
 }
