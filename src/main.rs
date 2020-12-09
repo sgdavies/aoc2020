@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 
+mod day_eight;
 mod day_five;
 mod day_four;
 mod day_one;
@@ -47,6 +48,8 @@ fn main() {
                 "6b" => solve_6b("data/6.txt").to_string(),
                 "7a" => day_seven::solve_7a("data/7.txt").to_string(),
                 "7b" => day_seven::solve_7b("data/7.txt").to_string(),
+                "8a" => day_eight::solve_8a("data/8.txt").to_string(),
+                "8b" => day_eight::solve_8b("data/8.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
