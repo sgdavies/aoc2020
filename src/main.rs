@@ -4,6 +4,7 @@ use std::fs;
 mod day_eight;
 mod day_five;
 mod day_four;
+mod day_nine;
 mod day_one;
 mod day_seven;
 mod day_six;
@@ -50,6 +51,8 @@ fn main() {
                 "7b" => day_seven::solve_7b("data/7.txt").to_string(),
                 "8a" => day_eight::solve_8a("data/8.txt").to_string(),
                 "8b" => day_eight::solve_8b("data/8.txt").to_string(),
+                "9a" => day_nine::solve_9a("data/9.txt", 25).to_string(),
+                "9b" => day_nine::solve_9b("data/9.txt", 25).to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
