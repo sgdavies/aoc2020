@@ -60,6 +60,7 @@ fn main() {
                 "10a" => day_ten::solve_10a("data/10.txt").to_string(),
                 "10b" => day_ten::solve_10b("data/10.txt").to_string(),
                 "11a" => day11::solve_part_one("data/11.txt").to_string(),
+                // "11b" => day11::solve_part_two("data/11.txt").to_string(),
                 "12a" => day12::part_one("data/12.txt").to_string(),
                 "13a" => day13::part_one("data/13.txt").to_string(),
                 _ => panic!("No target for '{}'", day),

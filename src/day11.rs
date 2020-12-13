@@ -1,21 +1,20 @@
 use crate::file_to_vec;
 use std::collections::HashMap;
 
+struct Seats {
+    seats: HashMap<(isize, isize), bool>,
+    dim_x: usize,
+    dim_y: usize,
+}
+
 pub(crate) fn solve_part_one(filename: &str) -> usize {
+    solve(filename, move_seats_one)
+}
+
+fn solve(filename: &str, move_seats: fn(&mut Seats) -> bool) -> usize {
     let mut seats: HashMap<(isize, isize), bool> = HashMap::new();
-    // file_to_vec(filename).iter().enumerate().map(|(y, s)| {
-    //     s.chars().enumerate().map(|(x, c)| match c {
-    //         '#' => {
-    //             seats.insert((x, y), false);
-    //         }
-    //         '.' => {
-    //             ();
-    //         }
-    //         unexpected => panic!("Unexpected input character: {:}", unexpected),
-    //     })
-    // });
     let input = file_to_vec(filename);
-    // let (dim_x, dim_y) = (input[0].len(), input.len());
+    let (dim_x, dim_y) = (input[0].len(), input.len());
     for (y, s) in input.iter().enumerate() {
         for (x, c) in s.chars().enumerate() {
             match c {
@@ -31,31 +30,33 @@ pub(crate) fn solve_part_one(filename: &str) -> usize {
         }
     }
 
-    loop {
-        let (new_seats, changed) = move_seats(&seats);
-        seats = new_seats;
-        // println!("iter {:}, changed? {:}", i, changed);
+    let mut seats = Seats {
+        seats,
+        dim_x,
+        dim_y,
+    };
 
-        if !changed {
-            return seats.values().filter(|b| **b).count();
-        }
-    }
+    while move_seats(&mut seats) {}
+    seats.seats.values().filter(|b| **b).count()
 }
 
 // Return true if there were any seat changes, otherwise false
-fn move_seats(seats: &HashMap<(isize, isize), bool>) -> (HashMap<(isize, isize), bool>, bool) {
+fn move_seats_one(seats: &mut Seats) -> bool {
+    move_seats(seats, adjacent_one, 4)
+}
+
+fn move_seats(
+    seats: &mut Seats,
+    full_seats_i_care_about: fn(isize, isize, &Seats) -> u32,
+    limit: u32,
+) -> bool {
     let mut new_seats: HashMap<(isize, isize), bool> = HashMap::new();
     let mut changed = false;
 
-    for ((x, y), occupied) in seats.iter() {
-        let adjacent_occupied = adjacent_indices(*x, *y).iter().fold(0, |acc, (ox, oy)| {
-            acc + match seats.get(&(*ox, *oy)) {
-                Some(true) => 1,
-                _ => 0,
-            }
-        });
+    for ((x, y), occupied) in seats.seats.iter() {
+        let adjacent_occupied = full_seats_i_care_about(*x, *y, &seats);
         let new_occupied = match (occupied, adjacent_occupied) {
-            (true, adj) if adj >= 4 => {
+            (true, adj) if adj >= limit => {
                 changed = true;
                 false
             }
@@ -65,11 +66,21 @@ fn move_seats(seats: &HashMap<(isize, isize), bool>) -> (HashMap<(isize, isize),
             }
             (_, _) => *occupied,
         };
-        // changed = new_occupied != *occupied;
         new_seats.insert((*x, *y), new_occupied);
     }
 
-    (new_seats, changed)
+    seats.seats = new_seats;
+    changed
+}
+
+fn adjacent_one(x: isize, y: isize, old_seats: &Seats) -> u32 {
+    let old_seats = &old_seats.seats;
+    adjacent_indices(x, y).iter().fold(0, |acc, (ox, oy)| {
+        acc + match old_seats.get(&(*ox, *oy)) {
+            Some(true) => 1,
+            _ => 0,
+        }
+    })
 }
 
 fn adjacent_indices(x: isize, y: isize) -> Vec<(isize, isize)> {
