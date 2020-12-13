@@ -55,6 +55,7 @@ fn main() {
                 "9a" => day_nine::solve_9a("data/9.txt", 25).to_string(),
                 "9b" => day_nine::solve_9b("data/9.txt", 25).to_string(),
                 "10a" => day_ten::solve_10a("data/10.txt").to_string(),
+                "10b" => day_ten::solve_10b("data/10.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
