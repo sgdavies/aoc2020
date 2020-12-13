@@ -25,9 +25,7 @@ pub(crate) fn solve_part_one(filename: &str) -> usize {
                 '#' => {
                     seats.insert((x as isize, y as isize), true);
                 }
-                '.' => {
-                    ();
-                }
+                '.' => {}
                 unexpected => panic!("Unexpected input character: {:}", unexpected),
             };
         }
@@ -87,7 +85,7 @@ fn adjacent_indices(x: isize, y: isize) -> Vec<(isize, isize)> {
     ]
 }
 
-fn pretty_print(seats: &HashMap<(isize, isize), bool>, dim_x: usize, dim_y: usize) {
+fn _pretty_print(seats: &HashMap<(isize, isize), bool>, dim_x: usize, dim_y: usize) {
     for y in 0..dim_y {
         let mut s: String = String::new();
         for x in 0..dim_x {
@@ -99,7 +97,7 @@ fn pretty_print(seats: &HashMap<(isize, isize), bool>, dim_x: usize, dim_y: usiz
         }
         println!("{}", s);
     }
-    println!("");
+    println!();
 }
 
 #[cfg(test)]
