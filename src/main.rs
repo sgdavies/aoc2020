@@ -4,6 +4,7 @@ use std::fs;
 mod day11;
 mod day12;
 mod day13;
+mod day14;
 mod day_eight;
 mod day_five;
 mod day_four;
@@ -65,6 +66,8 @@ fn main() {
                 "12b" => day12::part_two("data/12.txt").to_string(),
                 "13a" => day13::part_one("data/13.txt").to_string(),
                 "13b" => day13::part_two("data/13.txt").to_string(),
+                "14a" => day14::part_one("data/14.txt").to_string(),
+                "14b" => day14::part_two("data/14.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
