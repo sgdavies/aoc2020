@@ -1,27 +1,27 @@
 use std::env;
 use std::fs;
 
+mod day01;
+mod day02;
+mod day03;
+mod day04;
+mod day05;
+mod day06;
+mod day07;
+mod day08;
+mod day09;
+mod day10;
 mod day11;
 mod day12;
 mod day13;
 mod day14;
 mod day15;
-mod day_eight;
-mod day_five;
-mod day_four;
-mod day_nine;
-mod day_one;
-mod day_seven;
-mod day_six;
-mod day_ten;
-mod day_three;
-mod day_two;
-use crate::day_five::{solve_5a, solve_5b};
-use crate::day_four::DayFour;
-use crate::day_one::DayOne;
-use crate::day_six::{solve_6a, solve_6b};
-use crate::day_three::DayThree;
-use crate::day_two::DayTwo;
+use crate::day01::DayOne;
+use crate::day02::DayTwo;
+use crate::day03::DayThree;
+use crate::day04::DayFour;
+use crate::day05::{solve_5a, solve_5b};
+use crate::day06::{solve_6a, solve_6b};
 
 extern crate lazy_static;
 extern crate regex;
@@ -53,14 +53,14 @@ fn main() {
                 "5b" => solve_5b().to_string(),
                 "6a" => solve_6a("data/6.txt").to_string(),
                 "6b" => solve_6b("data/6.txt").to_string(),
-                "7a" => day_seven::solve_7a("data/7.txt").to_string(),
-                "7b" => day_seven::solve_7b("data/7.txt").to_string(),
-                "8a" => day_eight::solve_8a("data/8.txt").to_string(),
-                "8b" => day_eight::solve_8b("data/8.txt").to_string(),
-                "9a" => day_nine::solve_9a("data/9.txt", 25).to_string(),
-                "9b" => day_nine::solve_9b("data/9.txt", 25).to_string(),
-                "10a" => day_ten::solve_10a("data/10.txt").to_string(),
-                "10b" => day_ten::solve_10b("data/10.txt").to_string(),
+                "7a" => day07::solve_7a("data/7.txt").to_string(),
+                "7b" => day07::solve_7b("data/7.txt").to_string(),
+                "8a" => day08::solve_8a("data/8.txt").to_string(),
+                "8b" => day08::solve_8b("data/8.txt").to_string(),
+                "9a" => day09::solve_9a("data/9.txt", 25).to_string(),
+                "9b" => day09::solve_9b("data/9.txt", 25).to_string(),
+                "10a" => day10::solve_10a("data/10.txt").to_string(),
+                "10b" => day10::solve_10b("data/10.txt").to_string(),
                 "11a" => day11::part_one("data/11.txt").to_string(),
                 "11b" => day11::part_two("data/11.txt").to_string(),
                 "12a" => day12::part_one("data/12.txt").to_string(),
