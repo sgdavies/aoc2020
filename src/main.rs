@@ -5,6 +5,7 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day15;
 mod day_eight;
 mod day_five;
 mod day_four;
@@ -68,6 +69,8 @@ fn main() {
                 "13b" => day13::part_two("data/13.txt").to_string(),
                 "14a" => day14::part_one("data/14.txt").to_string(),
                 "14b" => day14::part_two("data/14.txt").to_string(),
+                "15a" => day15::part_one(&[6, 3, 15, 13, 1, 0], 2020).to_string(),
+                "15b" => day15::part_one(&[6, 3, 15, 13, 1, 0], 30000000).to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
