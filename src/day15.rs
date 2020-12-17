@@ -75,7 +75,7 @@ mod tests {
     }
 
     // #[test]
-    fn time() {
+    fn _time() {
         use std::time::Instant;
         let all_turns = [100_000, 300_000, 1_000_000, 3_000_000, 10_000_000];
         for &turns in all_turns.iter() {
