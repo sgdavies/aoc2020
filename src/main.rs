@@ -17,6 +17,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 
 use crate::day01::DayOne;
 use crate::day02::DayTwo;
@@ -75,6 +76,7 @@ fn main() {
                 "15b" => day15::part_one(&[6, 3, 15, 13, 1, 0], 30_000_000).to_string(),
                 "16a" => day16::part_one("data/16.txt").to_string(),
                 "16b" => day16::part_two("data/16.txt", "departure").to_string(),
+                "17a" => day17::part_one("data/17.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
