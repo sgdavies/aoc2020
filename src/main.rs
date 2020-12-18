@@ -77,6 +77,7 @@ fn main() {
                 "16a" => day16::part_one("data/16.txt").to_string(),
                 "16b" => day16::part_two("data/16.txt", "departure").to_string(),
                 "17a" => day17::part_one("data/17.txt").to_string(),
+                "17b" => day17::part_two("data/17.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
