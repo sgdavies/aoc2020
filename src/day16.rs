@@ -112,24 +112,14 @@ pub(crate) fn part_two(filename: &str, prefix: &str) -> u64 {
             .map(|c| *c.iter().next().unwrap())
             .collect();
 
-        // ಠ_ಠ
-        let mut new_cons_for_index: Vec<HashSet<&Constraint>> = Vec::new();
-        for cons in cons_for_index.iter() {
-            let new_cons: HashSet<&Constraint> = if cons.len() > 1 {
-                let mut tmp_cons: HashSet<&Constraint> = HashSet::new();
-                for item in cons.difference(&uniques) {
-                    tmp_cons.insert(*item);
-                }
-                tmp_cons
-            } else {
-                let mut tmp_cons: HashSet<&Constraint> = HashSet::new();
-                tmp_cons.insert(cons.iter().next().unwrap());
-                tmp_cons
-            };
-            new_cons_for_index.push(new_cons);
-        }
-
-        cons_for_index = new_cons_for_index;
+        // For sets that are not solved (len=1), remove the solved ones
+        cons_for_index = cons_for_index
+            .into_iter()
+            .map(|cons| match cons.len() {
+                1 => cons,
+                _ => cons.difference(&uniques).copied().collect(),
+            })
+            .collect();
     }
 
     let my_ticket: Vec<u32> = tickets.pop().unwrap();
