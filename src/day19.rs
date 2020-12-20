@@ -1,7 +1,7 @@
 use crate::file_to_vec;
-use std::collections::HashMap;
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
+use std::collections::HashMap;
 
 pub(crate) fn part_one(rules: &str, inputs: &str) -> usize {
     let (partial_rules, mut finished_rules) = build_rules(rules);
@@ -11,15 +11,37 @@ pub(crate) fn part_one(rules: &str, inputs: &str) -> usize {
 }
 
 pub(crate) fn part_two(rules: &str, inputs: &str) -> usize {
-    let (mut partial_rules, mut finished_rules) = build_rules(rules);
+    let (partial_rules, mut finished_rules) = build_rules(rules);
 
-    partial_rules.insert(8, "42 | 42 8".to_string());
-    partial_rules.insert(11, "42 31 | 42 11 31".to_string());
+    let rule_42 = rule_for_val(42, &partial_rules, &mut finished_rules);
+    let rule_31 = rule_for_val(31, &partial_rules, &mut finished_rules);
 
-    // Current approach infinite-loops on rules 8 & 11 which refer to themselves
-    unimplimented!();
-    // let pattern: &str = &format!("^{}$", rule_for_val(0, &partial_rules, &mut finished_rules));
-    // solve(inputs, pattern)
+    // 8 = "42 | 42 8" => "42+"
+    let mut rule_8 = "((".to_string();
+    rule_8.push_str(&rule_42);
+    rule_8.push_str(")+)");
+    finished_rules.insert(8, rule_8);
+
+    // 11: 42 31 | 42 11 31 => AB|AABB|AAABBB|...
+    // Not possible with a regular expression 😲
+    // Just build up to a sensible-looking limit.
+    let mut rule_11 = "(".to_string();
+    rule_11.push_str(&rule_42);
+    rule_11.push_str(&rule_31);
+    for repeats in 2..5 {
+        rule_11.push('|');
+        for _ in 0..repeats {
+            rule_11.push_str(&rule_42);
+        }
+        for _ in 0..repeats {
+            rule_11.push_str(&rule_31);
+        }
+    }
+    rule_11.push(')');
+    finished_rules.insert(11, rule_11);
+
+    let pattern: &str = &format!("^{}$", rule_for_val(0, &partial_rules, &mut finished_rules));
+    solve(inputs, pattern)
 }
 
 fn build_rules(rules: &str) -> (HashMap<u32, String>, HashMap<u32, String>) {
@@ -43,21 +65,28 @@ fn build_rules(rules: &str) -> (HashMap<u32, String>, HashMap<u32, String>) {
 
 fn solve(inputs: &str, pattern: &str) -> usize {
     let re = Regex::new(pattern).unwrap();
-    file_to_vec(inputs).iter().filter(|s| re.is_match(s)).count()
+    file_to_vec(inputs)
+        .iter()
+        .filter(|s| re.is_match(s))
+        .count()
 }
 
 lazy_static! {
     static ref HAS_NUMBERS: Regex = Regex::new(r"[0-9]+").unwrap();
 }
 
-fn rule_for_val(number: u32, partials: &HashMap<u32, String>, finished: &mut HashMap<u32, String>) -> String {
+fn rule_for_val(
+    number: u32,
+    partials: &HashMap<u32, String>,
+    finished: &mut HashMap<u32, String>,
+) -> String {
     match finished.get(&number) {
         Some(rule) => rule.to_string(),
         None => {
             let mut rule = "(".to_string();
             for elem in partials.get(&number).unwrap().split(' ') {
                 match elem {
-                    "|" => rule.push_str("|"),
+                    "|" => rule.push('|'),
                     num => {
                         let num = num.parse::<u32>().unwrap();
                         let sub_rule = rule_for_val(num, partials, finished);
@@ -67,10 +96,10 @@ fn rule_for_val(number: u32, partials: &HashMap<u32, String>, finished: &mut Has
                         }
 
                         rule.push_str(&sub_rule);
-                    },
+                    }
                 };
             }
-            rule.push_str(")");
+            rule.push(')');
 
             rule
         }
