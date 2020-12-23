@@ -6,58 +6,71 @@ use std::{fmt, fs};
 const TILE_WIDTH: usize = 10;
 
 pub(crate) fn part_one(filename: &str) -> u64 {
-    let tiles: Vec<Tile> = fs::read_to_string(filename)
-        .unwrap()
-        .split("\n\n")
-        .map(|s| Tile::from(s))
-        .collect();
+    SolvedMosaic::solve(filename).part_one_value()
+}
 
-    let mut tile_to_tiles: HashMap<u64, Tile> = HashMap::new();
-    let mut edge_to_tiles: HashMap<u16, HashSet<u64>> = HashMap::new();
-    for tile in &tiles {
-        tile_to_tiles.insert(tile.id, tile.clone());
+struct SolvedMosaic {
+    len: usize,
+    picture: Vec<Vec<Tile>>,
+}
 
-        for edge in tile.possible_edges.iter() {
-            edge_to_tiles
-                .entry(*edge)
-                .or_insert_with(HashSet::new)
-                .insert(tile.id);
+impl SolvedMosaic {
+    fn solve(filename: &str) -> SolvedMosaic {
+        let tiles: Vec<Tile> = fs::read_to_string(filename)
+            .unwrap()
+            .split("\n\n")
+            .map(|s| Tile::from(s))
+            .collect();
+
+        let mut tile_to_tiles: HashMap<u64, Tile> = HashMap::new();
+        let mut edge_to_tiles: HashMap<u16, HashSet<u64>> = HashMap::new();
+        for tile in &tiles {
+            tile_to_tiles.insert(tile.id, tile.clone());
+
+            for edge in tile.possible_edges.iter() {
+                edge_to_tiles
+                    .entry(*edge)
+                    .or_insert_with(HashSet::new)
+                    .insert(tile.id);
+            }
         }
-    }
-    // println!(
-    //     "tiles {:}, edges {:}, longest train {:}",
-    //     tiles.len(),
-    //     edge_to_tiles.len(),
-    //     edge_to_tiles.values().map(|hs| hs.len()).max().unwrap()
-    // );
 
-    let mut mosaic = match tiles.len() {
-        144 => Mosaic::new(12, tile_to_tiles),
-        9 => Mosaic::new(3, tile_to_tiles),
-        oops => panic!("Unexpected number of tiles: {:}", oops),
-    };
+        let mut mosaic = match tiles.len() {
+            144 => Mosaic {
+                len: 12,
+                tile_to_tiles,
+            },
+            9 => Mosaic {
+                len: 3,
+                tile_to_tiles,
+            },
+            oops => panic!("Unexpected number of tiles: {:}", oops),
+        };
 
-    for tile in &tiles {
-        if let Some(solution) = mosaic.solve_from(&tile) {
-            return solution;
+        for tile in &tiles {
+            if let Some(solution) = mosaic.solve_from(&tile) {
+                return solution;
+            }
         }
+
+        panic!("Couldn't find a solution");
     }
 
-    panic!("Couldn't find a solution");
+    fn part_one_value(&self) -> u64 {
+        self.picture[0][0].id
+            * self.picture[0][self.len - 1].id
+            * self.picture[self.len - 1][0].id
+            * self.picture[self.len - 1][self.len - 1].id
+    }
 }
 
 struct Mosaic {
     len: usize,
     tile_to_tiles: HashMap<u64, Tile>,
-    // picture: Option<Vec<Vec<&Tile>>>,
 }
 
 impl Mosaic {
-    fn new(len: usize, tile_to_tiles: HashMap<u64, Tile>) -> Mosaic {
-        Mosaic { len, tile_to_tiles }
-    }
-
-    fn solve_from(&mut self, tile: &Tile) -> Option<u64> {
+    fn solve_from(&mut self, tile: &Tile) -> Option<SolvedMosaic> {
         // Assume this is the top-left corner, and solve from here.
         // ("Top-left" is aribitrary - the picture can be any way up (flip/rotate))
         let mut tile = tile.clone();
@@ -97,7 +110,7 @@ impl Mosaic {
         &mut self,
         mut rows: &mut Vec<Vec<Tile>>,
         mut remaining_tiles: &mut HashSet<u64>,
-    ) -> Option<u64> {
+    ) -> Option<SolvedMosaic> {
         if remaining_tiles.is_empty() {
             // The picture is complete!
             // Let's just double-check some stuff and then return the answer.
@@ -108,17 +121,15 @@ impl Mosaic {
                 }
                 layout.push('\n');
             }
-            println!("Solved!?\n{}", layout);
             rows.pop(); // Urgh, we pushed on one more empty row...
+                        // println!("Solved!?\n{}", layout);
             assert!(rows.len() == self.len);
             assert!(rows.iter().all(|row| row.len() == self.len));
 
-            return Some(
-                rows[0][0].id
-                    * rows[0][self.len - 1].id
-                    * rows[self.len - 1][0].id
-                    * rows[self.len - 1][self.len - 1].id,
-            );
+            return Some(SolvedMosaic {
+                len: self.len,
+                picture: rows.to_vec(),
+            });
         }
 
         let current_row_index: usize = rows.len() - 1; // May point to an empty vec
@@ -211,12 +222,9 @@ struct Tile {
     id: u64,
 
     // Will change as tile is flipped/rotated
-    // top/bottom both read left-to-right, left, right both read top-to-bottom
+    // top/bottom both read left-to-right; left, right both read top-to-bottom
     // This means if A stacks on B then A.bottom()==B.top() etc.
-    xtop: u16,
-    xbottom: u16,
-    xleft: u16,
-    xright: u16,
+    contents: Vec<u16>,
 
     // All possible edges
     possible_edges: HashSet<u16>,
@@ -227,20 +235,16 @@ impl Tile {
         let mut lines = definition.lines();
         let id = lines.next().unwrap()[5..9].parse::<u64>().unwrap();
 
-        let chars: Vec<Vec<char>> = lines.map(|s| s.chars().collect()).collect();
+        // let chars: Vec<Vec<char>> = lines.map(|s| s.chars().collect()).collect();
 
-        let xtop = Tile::line_to_u16(&chars[0].iter().collect::<String>());
-        let xbottom = Tile::line_to_u16(&chars[TILE_WIDTH - 1].iter().collect::<String>());
-        let xleft = Tile::line_to_u16(&chars.iter().map(|vc| vc[0]).collect::<String>());
-        let xright = Tile::line_to_u16(
-            &chars
-                .iter()
-                .map(|vc| vc[TILE_WIDTH - 1])
-                .collect::<String>(),
-        );
+        let contents: Vec<u16> = lines.map(|s| Tile::line_to_u16(s)).collect();
+        let top = contents[0];
+        let bottom = *contents.last().unwrap();
+        let left = Tile::get_left(&contents);
+        let right = Tile::get_right(&contents);
 
         let mut possible_edges: HashSet<u16> = HashSet::new();
-        for edge in &[xtop, xbottom, xleft, xright] {
+        for edge in &[top, bottom, left, right] {
             possible_edges.insert(*edge);
             possible_edges.insert(reverse_10_bits(*edge));
         }
@@ -249,10 +253,7 @@ impl Tile {
 
         Tile {
             id,
-            xtop,
-            xbottom,
-            xleft,
-            xright,
+            contents,
             possible_edges,
         }
     }
@@ -263,21 +264,24 @@ impl Tile {
 
     fn rotate(&mut self) {
         // Anti-clockwise
-        let tmp = reverse_10_bits(self.xtop);
-        self.xtop = self.xright;
-        self.xright = reverse_10_bits(self.xbottom);
-        self.xbottom = self.xleft;
-        self.xleft = tmp;
+        let mut new_contents: Vec<u16> = Vec::new();
+
+        for shift in 0..TILE_WIDTH {
+            new_contents.push(Tile::get_right(
+                &self
+                    .contents
+                    .iter()
+                    .map(|&u| u >> shift)
+                    .collect::<Vec<u16>>(),
+            ));
+        }
+
+        self.contents = new_contents;
     }
 
     fn flip(&mut self) {
         // About the horizontal axis
-        let tmp = self.xtop;
-        self.xtop = self.xbottom;
-        self.xbottom = tmp;
-
-        self.xleft = reverse_10_bits(self.xleft);
-        self.xright = reverse_10_bits(self.xright);
+        self.contents.reverse();
     }
 
     fn turn_to_top(&mut self, val: u16) {
@@ -302,7 +306,12 @@ impl Tile {
 
         panic!(
             "Couldn't match val {:} on tile {:} [{:}, {:}, {:}, {:}]",
-            val, self.id, self.top(), self.left(), self.bottom(), self.right()
+            val,
+            self.id,
+            self.top(),
+            self.left(),
+            self.bottom(),
+            self.right()
         );
     }
 
@@ -312,19 +321,37 @@ impl Tile {
     }
 
     fn top(&self) -> u16 {
-        self.xtop
+        self.contents[0]
     }
 
     fn bottom(&self) -> u16 {
-        self.xbottom
+        *self.contents.last().unwrap()
     }
 
     fn left(&self) -> u16 {
-        self.xleft
+        Tile::get_left(&self.contents)
     }
 
     fn right(&self) -> u16 {
-        self.xright
+        Tile::get_right(&self.contents)
+    }
+
+    fn get_left(contents: &[u16]) -> u16 {
+        Tile::get_edge(contents, true)
+    }
+
+    fn get_right(contents: &[u16]) -> u16 {
+        Tile::get_edge(contents, false)
+    }
+
+    fn get_edge(contents: &[u16], left_not_right: bool) -> u16 {
+        let shift = match left_not_right {
+            true => TILE_WIDTH - 1,
+            false => 0,
+        };
+        contents.iter().enumerate().fold(0, |acc, (i, b)| {
+            acc | (((b & (1 << shift)) >> shift) << (TILE_WIDTH - 1 - i))
+        })
     }
 }
 
