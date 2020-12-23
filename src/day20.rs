@@ -1,4 +1,3 @@
-#![allow(unused)] // TODO : remove
 use lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
@@ -12,7 +11,6 @@ pub(crate) fn part_one(filename: &str) -> u64 {
         .split("\n\n")
         .map(|s| Tile::from(s))
         .collect();
-    let tile_map: HashMap<u64, &Tile> = tiles.iter().map(|tile| (tile.id, tile)).collect();
 
     let mut tile_to_tiles: HashMap<u64, Tile> = HashMap::new();
     let mut edge_to_tiles: HashMap<u16, HashSet<u64>> = HashMap::new();
@@ -63,7 +61,6 @@ impl Mosaic {
         // Assume this is the top-left corner, and solve from here.
         // ("Top-left" is aribitrary - the picture can be any way up (flip/rotate))
         let mut tile = tile.clone();
-        let starting_right_edge = tile.right;
 
         let mut rows: Vec<Vec<Tile>> = Vec::new();
         rows.push(Vec::new());
