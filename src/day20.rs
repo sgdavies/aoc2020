@@ -127,16 +127,43 @@ impl Picture {
             }
             acc + n_bits
         });
-        println!("Bits in picture: {:}", x);
+        // println!("Bits in picture: {:}", x);
         x
     }
 
     fn count_monster_bits(&self) -> usize {
+        // Find all the monsters in the picture
         // <                  # >
         // <#    ##    ##    ###>
         // < #  #  #  #  #  #   >
-        // static BITS_IN_MONSTER = 15;
-        0 // TODO
+        let monster_parts: Vec<u128> = vec![
+            0b00000000000000000010,
+            0b10000110000110000111,
+            0b01001001001001001000,
+        ];
+        let monster_length: usize = 20; // From tip to tail
+        let bits_in_monster: usize = 15; // Could calculate this, but I just counted
+
+        // Count the monsters
+        let mut number_of_monsters = 0;
+
+        let width = self.pic.len();
+        for row_id in 0..width - 2 {
+            // Monster is 3 lines long, so stop before the end
+            for pos in 0..(width - monster_length) {
+                if (0..3).all(|i| {
+                    // Head, body & legs must all match
+                    let mask = monster_parts[i] << (pos as u128);
+                    (self.pic[row_id + i] & mask) == mask
+                }) {
+                    number_of_monsters += 1;
+                    // Could skip forward a bit now, but no real need
+                }
+            }
+        }
+
+        // println!("Found {:} monsters", number_of_monsters);
+        number_of_monsters * bits_in_monster
     }
 
     fn rotate(&mut self) {
@@ -154,7 +181,7 @@ impl Picture {
         self.pic = new_pic;
     }
 
-    fn get_right_128(array: &Vec<u128>, width: usize) -> u128 {
+    fn get_right_128(array: &[u128], width: usize) -> u128 {
         array
             .iter()
             .enumerate()
