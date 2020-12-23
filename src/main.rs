@@ -86,6 +86,7 @@ fn main() {
                 "19a" => day19::part_one("data/19rules.txt", "data/19inputs.txt").to_string(),
                 "19b" => day19::part_two("data/19rules.txt", "data/19inputs.txt").to_string(),
                 "20a" => day20::part_one("data/20.txt").to_string(),
+                "20b" => day20::part_two("data/20.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );

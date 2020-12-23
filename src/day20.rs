@@ -9,9 +9,13 @@ pub(crate) fn part_one(filename: &str) -> u64 {
     SolvedMosaic::solve(filename).part_one_value()
 }
 
+pub(crate) fn part_two(filename: &str) -> usize {
+    SolvedMosaic::solve(filename).part_two_value()
+}
+
 struct SolvedMosaic {
     len: usize,
-    picture: Vec<Vec<Tile>>,
+    tiles: Vec<Vec<Tile>>,
 }
 
 impl SolvedMosaic {
@@ -57,10 +61,108 @@ impl SolvedMosaic {
     }
 
     fn part_one_value(&self) -> u64 {
-        self.picture[0][0].id
-            * self.picture[0][self.len - 1].id
-            * self.picture[self.len - 1][0].id
-            * self.picture[self.len - 1][self.len - 1].id
+        self.tiles[0][0].id
+            * self.tiles[0][self.len - 1].id
+            * self.tiles[self.len - 1][0].id
+            * self.tiles[self.len - 1][self.len - 1].id
+    }
+
+    fn part_two_value(&self) -> usize {
+        // Stitch the tiles into a picture
+        let mut picture: Vec<u128> = Vec::new();
+        for tile_row in &self.tiles {
+            // Trim off both top & bottom, and left & right
+            for y in 1..(TILE_WIDTH - 1) {
+                picture.push(tile_row.iter().enumerate().fold(0, |acc, (i, tile)| {
+                    acc | (((tile.contents[y] as u128 >> 1) & 0b1111_1111)
+                        << ((TILE_WIDTH - 2) * (self.len - 1 - i)))
+                }));
+            }
+        }
+
+        // (maybe print it, for fun!)
+        for x in &picture {
+            let width = self.len * (TILE_WIDTH - 2);
+            println!("{:0width$b}", x, width = width);
+        }
+
+        let mut picture = Picture { pic: picture };
+
+        // Find & count all the monsters - in all orientations of the picture
+        let mut all_orientations: Vec<Picture> = Vec::new();
+        all_orientations.push(picture.clone());
+        for _ in 0..3 {
+            picture.rotate();
+            all_orientations.push(picture.clone());
+        }
+        picture.flip();
+        all_orientations.push(picture.clone());
+        for _ in 0..3 {
+            picture.rotate();
+            all_orientations.push(picture.clone());
+        }
+        assert!(all_orientations.len() == 8);
+
+        // Count all the '#', take off the monsters => answer
+        picture.count_bits()
+            - all_orientations
+                .iter()
+                .fold(0, |max, pic| std::cmp::max(max, pic.count_monster_bits()))
+    }
+}
+
+#[derive(Clone)]
+struct Picture {
+    pic: Vec<u128>,
+}
+
+impl Picture {
+    fn count_bits(&self) -> usize {
+        let x = self.pic.iter().fold(0, |acc, row| {
+            let mut n_bits = 0;
+            let mut number: u128 = *row;
+            while number > 0 {
+                n_bits += (number & 1) as usize;
+                number >>= 1;
+            }
+            acc + n_bits
+        });
+        println!("Bits in picture: {:}", x);
+        x
+    }
+
+    fn count_monster_bits(&self) -> usize {
+        // <                  # >
+        // <#    ##    ##    ###>
+        // < #  #  #  #  #  #   >
+        // static BITS_IN_MONSTER = 15;
+        0 // TODO
+    }
+
+    fn rotate(&mut self) {
+        // Anti-clockwise
+        let mut new_pic: Vec<u128> = Vec::new();
+
+        let width = self.pic.len(); // It's a square
+        for shift in 0..width {
+            new_pic.push(Picture::get_right_128(
+                &self.pic.iter().map(|&u| u >> shift).collect::<Vec<u128>>(),
+                width,
+            ));
+        }
+
+        self.pic = new_pic;
+    }
+
+    fn get_right_128(array: &Vec<u128>, width: usize) -> u128 {
+        array
+            .iter()
+            .enumerate()
+            .fold(0, |acc, (i, b)| acc | ((b & 1) << (width - 1 - i)))
+    }
+
+    fn flip(&mut self) {
+        self.pic.reverse();
     }
 }
 
@@ -128,7 +230,7 @@ impl Mosaic {
 
             return Some(SolvedMosaic {
                 len: self.len,
-                picture: rows.to_vec(),
+                tiles: rows.to_vec(),
             });
         }
 
@@ -462,5 +564,10 @@ mod tests {
     #[test]
     fn test_one() {
         assert!(part_one("data/20_example.txt") == 20899048083289);
+    }
+
+    #[test]
+    fn test_two() {
+        assert!(part_two("data/20_example.txt") == 273);
     }
 }
