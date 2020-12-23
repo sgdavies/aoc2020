@@ -24,12 +24,12 @@ pub(crate) fn part_one(filename: &str) -> u64 {
                 .insert(tile.id);
         }
     }
-    println!(
-        "tiles {:}, edges {:}, longest train {:}",
-        tiles.len(),
-        edge_to_tiles.len(),
-        edge_to_tiles.values().map(|hs| hs.len()).max().unwrap()
-    );
+    // println!(
+    //     "tiles {:}, edges {:}, longest train {:}",
+    //     tiles.len(),
+    //     edge_to_tiles.len(),
+    //     edge_to_tiles.values().map(|hs| hs.len()).max().unwrap()
+    // );
 
     let mut mosaic = match tiles.len() {
         144 => Mosaic::new(12, tile_to_tiles),
@@ -139,7 +139,7 @@ impl Mosaic {
                     .get(t_id)
                     .unwrap()
                     .possible_edges
-                    .contains(&left.right),
+                    .contains(&left.right()),
                 None => true,
             })
             .filter(|t_id| match tile_above {
@@ -148,7 +148,7 @@ impl Mosaic {
                     .get(t_id)
                     .unwrap()
                     .possible_edges
-                    .contains(&above.bottom),
+                    .contains(&above.bottom()),
                 None => true,
             })
             .copied()
@@ -160,7 +160,7 @@ impl Mosaic {
                 .iter()
                 .map(|id| {
                     let mut tile = self.tile_to_tiles.get(id).unwrap().clone();
-                    tile.turn_to_top(above.bottom);
+                    tile.turn_to_top(above.bottom());
                     tile
                 })
                 .collect(),
@@ -168,7 +168,7 @@ impl Mosaic {
                 .iter()
                 .map(|id| {
                     let mut tile = self.tile_to_tiles.get(id).unwrap().clone();
-                    tile.turn_to_left(left.right);
+                    tile.turn_to_left(left.right());
                     tile
                 })
                 .collect(),
@@ -176,10 +176,10 @@ impl Mosaic {
                 .iter()
                 .map(|id| {
                     let mut tile = self.tile_to_tiles.get(id).unwrap().clone();
-                    tile.turn_to_top(above.bottom);
+                    tile.turn_to_top(above.bottom());
                     tile
                 })
-                .filter(|tile| tile.left == left.right)
+                .filter(|tile| tile.left() == left.right())
                 .collect(),
             (None, None) => panic!("You told me one of these tiles matched!"),
         };
@@ -212,11 +212,11 @@ struct Tile {
 
     // Will change as tile is flipped/rotated
     // top/bottom both read left-to-right, left, right both read top-to-bottom
-    // This means if A stacks on B then A.bottom==B.top etc.
-    top: u16,
-    bottom: u16,
-    left: u16,
-    right: u16,
+    // This means if A stacks on B then A.bottom()==B.top() etc.
+    xtop: u16,
+    xbottom: u16,
+    xleft: u16,
+    xright: u16,
 
     // All possible edges
     possible_edges: HashSet<u16>,
@@ -229,10 +229,10 @@ impl Tile {
 
         let chars: Vec<Vec<char>> = lines.map(|s| s.chars().collect()).collect();
 
-        let top = Tile::line_to_u16(&chars[0].iter().collect::<String>());
-        let bottom = Tile::line_to_u16(&chars[TILE_WIDTH - 1].iter().collect::<String>());
-        let left = Tile::line_to_u16(&chars.iter().map(|vc| vc[0]).collect::<String>());
-        let right = Tile::line_to_u16(
+        let xtop = Tile::line_to_u16(&chars[0].iter().collect::<String>());
+        let xbottom = Tile::line_to_u16(&chars[TILE_WIDTH - 1].iter().collect::<String>());
+        let xleft = Tile::line_to_u16(&chars.iter().map(|vc| vc[0]).collect::<String>());
+        let xright = Tile::line_to_u16(
             &chars
                 .iter()
                 .map(|vc| vc[TILE_WIDTH - 1])
@@ -240,7 +240,7 @@ impl Tile {
         );
 
         let mut possible_edges: HashSet<u16> = HashSet::new();
-        for edge in &[top, bottom, left, right] {
+        for edge in &[xtop, xbottom, xleft, xright] {
             possible_edges.insert(*edge);
             possible_edges.insert(reverse_10_bits(*edge));
         }
@@ -249,10 +249,10 @@ impl Tile {
 
         Tile {
             id,
-            top,
-            bottom,
-            left,
-            right,
+            xtop,
+            xbottom,
+            xleft,
+            xright,
             possible_edges,
         }
     }
@@ -263,27 +263,27 @@ impl Tile {
 
     fn rotate(&mut self) {
         // Anti-clockwise
-        let tmp = reverse_10_bits(self.top);
-        self.top = self.right;
-        self.right = reverse_10_bits(self.bottom);
-        self.bottom = self.left;
-        self.left = tmp;
+        let tmp = reverse_10_bits(self.xtop);
+        self.xtop = self.xright;
+        self.xright = reverse_10_bits(self.xbottom);
+        self.xbottom = self.xleft;
+        self.xleft = tmp;
     }
 
     fn flip(&mut self) {
         // About the horizontal axis
-        let tmp = self.top;
-        self.top = self.bottom;
-        self.bottom = tmp;
+        let tmp = self.xtop;
+        self.xtop = self.xbottom;
+        self.xbottom = tmp;
 
-        self.left = reverse_10_bits(self.left);
-        self.right = reverse_10_bits(self.right);
+        self.xleft = reverse_10_bits(self.xleft);
+        self.xright = reverse_10_bits(self.xright);
     }
 
     fn turn_to_top(&mut self, val: u16) {
         // Flip/ rotate until the top is the value we want
         for _turn in 0..4 {
-            if self.top == val {
+            if self.top() == val {
                 return;
             }
 
@@ -293,7 +293,7 @@ impl Tile {
         self.flip();
 
         for _turn in 0..4 {
-            if self.top == val {
+            if self.top() == val {
                 return;
             }
 
@@ -302,13 +302,29 @@ impl Tile {
 
         panic!(
             "Couldn't match val {:} on tile {:} [{:}, {:}, {:}, {:}]",
-            val, self.id, self.top, self.left, self.bottom, self.right
+            val, self.id, self.top(), self.left(), self.bottom(), self.right()
         );
     }
 
     fn turn_to_left(&mut self, val: u16) {
         self.turn_to_top(reverse_10_bits(val)); // Top to side is flipped on rotate, because of how I've defined the reading direction
         self.rotate();
+    }
+
+    fn top(&self) -> u16 {
+        self.xtop
+    }
+
+    fn bottom(&self) -> u16 {
+        self.xbottom
+    }
+
+    fn left(&self) -> u16 {
+        self.xleft
+    }
+
+    fn right(&self) -> u16 {
+        self.xright
     }
 }
 
@@ -389,31 +405,31 @@ mod tests {
 ###...#.#.
 ..###..###",
         );
-        assert!(tile.top == 0b00110_10010);
-        assert!(tile.left == 0b01111_10010);
-        assert!(tile.bottom == 0b00111_00111);
-        assert!(tile.right == 0b00010_11001);
+        assert!(tile.top() == 0b00110_10010);
+        assert!(tile.left() == 0b01111_10010);
+        assert!(tile.bottom() == 0b00111_00111);
+        assert!(tile.right() == 0b00010_11001);
 
         tile.rotate();
-        assert!(tile.left == 0b01001_01100);
-        assert!(tile.bottom == 0b01111_10010);
-        assert!(tile.right == 0b11100_11100);
-        assert!(tile.top == 0b00010_11001);
+        assert!(tile.left() == 0b01001_01100);
+        assert!(tile.bottom() == 0b01111_10010);
+        assert!(tile.right() == 0b11100_11100);
+        assert!(tile.top() == 0b00010_11001);
 
         tile.flip();
-        assert!(tile.left == 0b00110_10010);
-        assert!(tile.bottom == 0b00010_11001);
-        assert!(tile.right == 0b00111_00111);
-        assert!(tile.top == 0b01111_10010);
+        assert!(tile.left() == 0b00110_10010);
+        assert!(tile.bottom() == 0b00010_11001);
+        assert!(tile.right() == 0b00111_00111);
+        assert!(tile.top() == 0b01111_10010);
 
         tile.turn_to_top(0b00110_10010); // Starting position
-        assert!(tile.left == 0b01111_10010);
+        assert!(tile.left() == 0b01111_10010);
 
         tile.turn_to_left(0b01001_01100);
-        assert!(tile.bottom == 0b01111_10010);
+        assert!(tile.bottom() == 0b01111_10010);
 
         tile.turn_to_left(0b11100_11100); // A flipped position
-        assert!(tile.top == 0b10011_01000);
+        assert!(tile.top() == 0b10011_01000);
     }
 
     #[test]
