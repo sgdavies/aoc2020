@@ -92,6 +92,7 @@ fn main() {
                 "21a" => day21::part_one("data/21.txt").to_string(),
                 "21b" => day21::part_two("data/21.txt").to_string(),
                 "22a" => day22::part_one("data/22_1.txt", "data/22_2.txt").to_string(),
+                "22b" => day22::part_two("data/22_1.txt", "data/22_2.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );

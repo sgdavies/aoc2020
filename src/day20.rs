@@ -151,7 +151,7 @@ impl Picture {
         for row_id in 0..width - 2 {
             // Monster is 3 lines long, so stop before the end
             for pos in 0..(width - monster_length) {
-                if let true = (0..3).all(|i| { 
+                if let true = (0..3).all(|i| {
                     // Head, body & legs must all match
                     let mask = monster_parts[i] << (pos as u128);
                     (self.pic[row_id + i] & mask) == mask
