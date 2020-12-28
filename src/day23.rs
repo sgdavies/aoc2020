@@ -1,6 +1,26 @@
-pub(crate) fn crab_cups(input: &str, rounds: usize) -> String {
-    let len = input.len();
-    let mut cups: Vec<usize> = input.chars().map(|c| c.to_digit(10).unwrap() as usize).collect();
+pub(crate) fn part_one(input: &str, rounds: usize) -> String {
+    let cups: Vec<usize> = input.chars().map(|c| c.to_digit(10).unwrap() as usize).collect();
+
+    let cups = crab_cups(cups, rounds);
+
+    // Rotate so 1 is at the start
+    let ix_1 = cups.iter().position(|&x| x == 1).unwrap();
+    let (last, first) = cups.split_at(ix_1);
+    let mut out = String::new();
+    for c in first.iter() {
+        match c {
+            1 => {},
+            _ => out.push(std::char::from_digit(*c as u32, 10).unwrap()),
+        }
+    } 
+    for c in last.iter() {
+        out.push(std::char::from_digit(*c as u32, 10).unwrap());
+    } 
+    out
+}
+
+pub(crate) fn crab_cups(mut cups: Vec<usize>, rounds: usize) -> Vec<usize> {
+    let len = cups.len();
 
     for _i in 0..rounds {
         let current = cups[0];
@@ -23,20 +43,7 @@ pub(crate) fn crab_cups(input: &str, rounds: usize) -> String {
         // println!("  next {:?}", cups);
     }
 
-    // Rotate so 1 is at the start
-    let ix_1 = cups.iter().position(|&x| x == 1).unwrap();
-    let (last, first) = cups.split_at(ix_1);
-    let mut out = String::new();
-    for c in first.iter() {
-        match c {
-            1 => {},
-            _ => out.push(std::char::from_digit(*c as u32, 10).unwrap()),
-        }
-    } 
-    for c in last.iter() {
-        out.push(std::char::from_digit(*c as u32, 10).unwrap());
-    } 
-    out
+    cups
 }
 
 fn get_destination(current: usize, one: usize, two: usize, three: usize, len: usize) -> usize {
@@ -61,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_rotate() {
-        assert!(&crab_cups("23451", 0) == "2345");
+        assert!(&part_one("23451", 0) == "2345");
     }
 
     #[test]
@@ -74,8 +81,8 @@ mod tests {
 
     #[test]
     fn test_game() {
-        assert!(&crab_cups("389125467", 1) == "54673289");
-        assert!(&crab_cups("389125467", 10) == "92658374");
-        assert!(&crab_cups("389125467", 100) == "67384529");
+        assert!(&part_one("389125467", 1) == "54673289");
+        assert!(&part_one("389125467", 10) == "92658374");
+        assert!(&part_one("389125467", 100) == "67384529");
     }
 }

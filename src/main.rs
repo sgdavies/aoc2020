@@ -94,7 +94,7 @@ fn main() {
                 "21b" => day21::part_two("data/21.txt").to_string(),
                 "22a" => day22::part_one("data/22_1.txt", "data/22_2.txt").to_string(),
                 "22b" => day22::part_two("data/22_1.txt", "data/22_2.txt").to_string(),
-                "23a" => day23::crab_cups("368195742", 100).to_string(),
+                "23a" => day23::part_one("368195742", 100).to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
