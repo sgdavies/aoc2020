@@ -22,7 +22,7 @@ pub(crate) fn part_one(input: &str, rounds: usize) -> String {
     out
 }
 
-pub(crate) fn part_two(input: &str, rounds: usize, n_cups: usize) -> usize {
+pub(crate) fn part_two(input: &str, rounds: usize, n_cups: usize) -> u64 {
     let mut cups: LinkedList<usize> = input
         .chars()
         .map(|c| c.to_digit(10).unwrap() as usize)
@@ -35,38 +35,55 @@ pub(crate) fn part_two(input: &str, rounds: usize, n_cups: usize) -> usize {
 
     // Lazily assume 1 isn't right at the end of the array
     while cups.pop_front().unwrap() != 1 {}
-    cups.pop_front().unwrap() * cups.pop_front().unwrap()
+    (cups.pop_front().unwrap() as u64) * (cups.pop_front().unwrap() as u64)
 }
 
 pub(crate) fn crab_cups(mut cups: LinkedList<usize>, rounds: usize) -> LinkedList<usize> {
+    let cups: Vec<usize> = cups.iter().map(|x| *x).collect();
     let len = cups.len();
 
-    for _i in 0..rounds {
-        let current = cups.pop_front().unwrap();
-        let one = cups.pop_front().unwrap();
-        let two = cups.pop_front().unwrap();
-        let three = cups.pop_front().unwrap();
-        let destination = get_destination(current, one, two, three, len);
+    let mut current = cups[0];
 
-        // Rust LinkedList doesn't have a find/index_of method :-(
-        let dest_index = cups
-            .iter()
-            .enumerate()
-            .fold(None, |a, (i, x)| match x {
-                t if *t == destination => Some(i),
-                _ => a,
-            })
-            .unwrap(); // Inefficient - always searches whole array.
+    // Initialize the vec - empty.  We won't use the 0th index, but we do want a slot for every other item in the input list.
+    let mut next_cups: Vec<usize> = vec![0];
+    for _ in cups.iter() { next_cups.push(0); }
 
-        let mut back_cups = cups.split_off(dest_index + 1);
-        cups.push_back(one);
-        cups.push_back(two);
-        cups.push_back(three);
-        cups.append(&mut back_cups);
-
-        cups.push_back(current);
+    for i in 0..len {
+        let next_i = (i + 1) % len;
+        next_cups[cups[i]] = cups[next_i];
     }
 
+    for _i in 0..rounds {
+        // The next three cups
+        let one = next_cups[current];
+        let two = next_cups[one];
+        let three = next_cups[two];
+
+        let next_current = next_cups[three];
+        let destination = get_destination(current, one, two, three, len);
+        let next = next_cups[destination];
+
+        next_cups[destination] = one;
+        // two and three are already in the right places
+        next_cups[three] = next;
+        next_cups[current] = next_current;
+
+        current = next_current;
+    }
+
+    let mut cups = LinkedList::new();
+    cups.push_back(1);
+    let mut next = next_cups[1];
+    loop {
+        if next == 1 {
+            break;
+        }
+        cups.push_back(next);
+        next = next_cups[next];
+    }
+
+    // println!("{:?}", next_cups);
+    // println!("{:?}", cups);
     cups
 }
 
@@ -93,6 +110,7 @@ mod tests {
     #[test]
     fn test_rotate() {
         assert!(&part_one("23451", 0) == "2345");
+        assert!(&part_one("45123", 0) == "2345");
     }
 
     #[test]
@@ -119,8 +137,8 @@ mod tests {
     #[test]
     fn _time() {
         use std::time::Instant;
-        let all_turns = [3_000]; //[1_000, 3_000, 10_000, 30_000];//, 3_000, 10_000]; // Linear on n-turns
-        let all_sizes = [3_000, 10_000, 30_000, 100_000]; //[1_000, 10_000, 100_000];
+        let all_turns = [30_000, 100_000]; //[1_000, 3_000, 10_000, 30_000];//, 3_000, 10_000]; // Linear on n-turns
+        let all_sizes = [1_000_000]; //[1_000, 10_000, 100_000];
         for &turns in all_turns.iter() {
             for &size in all_sizes.iter() {
                 let start = Instant::now();
