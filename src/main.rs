@@ -98,7 +98,7 @@ fn main() {
                 "23a" => day23::part_one("368195742", 100).to_string(),
                 "23b" => day23::part_two("368195742", 10_000_000, 1_000_000).to_string(),
                 "24a" => day24::part_one("data/24.txt").to_string(),
-                "24b" => day24::part_two("data/24.txt").to_string(),
+                "24b" => day24::part_two("data/24.txt", 100).to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );

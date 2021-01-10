@@ -10,7 +10,7 @@ Most days run in well under 1s.  Some days are taking longer - could be interest
 | 11-2 | ~20s  | ~1s  |
 | 15-2 | ~180s | ~15s | Test shows this is linear on input size - so optimization would need to cut down time per iteration, or see if there is a shortcut algorithm that can go straight to the answer.
 | 17-1 |       | 0.5s |
-| 17-2 |       | ~18s | Improvement: memoize the `get_neighbours` function.
+| 17-2 |       | ~18s | Improvement: memoize the `get_neighbours` function (though note this didn't make much difference for 24b)
 | 22-2 | ~60s  | 2.9s |
 | 23-2 | ~12s  | 1.6s | 
-| 24-2 |       | 135s | Not sure why this one is so slow
+| 24-2 | ~14s  | 0.9s | Sped up from 135s by simplifying algorithm

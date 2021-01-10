@@ -5,45 +5,38 @@ pub(crate) fn part_one(input: &str) -> usize {
     build_floor(input).values().filter(|x| **x).count()
 }
 
-pub(crate) fn part_two(input: &str) -> usize {
-    const DAYS: usize = 100;
+pub(crate) fn part_two(input: &str, days: usize) -> usize {
     let mut floor = build_floor(input);
     let mut neighbours = Neighbours::new();
 
-    for _i in 0..DAYS {
+    for _i in 0..days {
         let mut new_floor: HashMap<(i32, i32), bool> = HashMap::new();
 
-        // Need to consider all black tiles, and all tiles touching a black tile
+        // For each black tile, increment the "black neighbour" count for each of its neighbours
+        let mut black_neighbours: HashMap<(i32, i32), u32> = HashMap::new();
         let black_tiles: HashSet<(i32, i32)> = floor
             .iter()
             .filter(|(_k, v)| **v)
             .map(|(coords, _v)| *coords)
             .collect();
-        let possible_tiles: HashSet<(i32, i32)> =
-            black_tiles.iter().fold(black_tiles.clone(), |acc, coords| {
-                acc.union(&neighbours.neighbours(coords))
-                    .copied()
-                    .collect()
-            });
+        for black_tile in black_tiles.iter() {
+            for neighbour in neighbours.neighbours(black_tile).iter() {
+                let count = black_neighbours.entry(*neighbour).or_insert(0);
+                *count += 1;
+            }
+        }
 
-        for tile in possible_tiles.iter() {
-            let black_neighbours = neighbours.neighbours(tile).iter().fold(0, |acc, neigh| {
-                acc + match floor.get(neigh) {
-                    Some(true) => 1,
-                    _ => 0,
-                }
-            });
-
+        for (tile, count) in black_neighbours.iter() {
             match floor.get(tile) {
                 Some(true) => {
                     // Black tile. 0 or 3+ black neighbours -> turn white
-                    if black_neighbours == 1 || black_neighbours == 2 {
+                    if *count == 1 || *count == 2 {
                         new_floor.insert(*tile, true);
                     }
                 }
                 _ => {
                     // White tile. 2 black neighbours -> turn black
-                    if black_neighbours == 2 {
+                    if *count == 2 {
                         new_floor.insert(*tile, true);
                     }
                 }
@@ -163,6 +156,6 @@ mod tests {
 
     #[test]
     fn test_two() {
-        assert!(part_two("data/24_example.txt") == 2208);
+        assert!(part_two("data/24_example.txt", 100) == 2208);
     }
 }
