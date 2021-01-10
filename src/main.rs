@@ -24,6 +24,7 @@ mod day20;
 mod day21;
 mod day22;
 mod day23;
+mod day24;
 
 use crate::day01::DayOne;
 use crate::day02::DayTwo;
@@ -96,6 +97,7 @@ fn main() {
                 "22b" => day22::part_two("data/22_1.txt", "data/22_2.txt").to_string(),
                 "23a" => day23::part_one("368195742", 100).to_string(),
                 "23b" => day23::part_two("368195742", 10_000_000, 1_000_000).to_string(),
+                "24a" => day24::part_one("data/24.txt").to_string(),
                 _ => panic!("No target for '{}'", day),
             }
         );
