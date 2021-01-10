@@ -1,90 +1,89 @@
-use std::collections::LinkedList;
-
 pub(crate) fn part_one(input: &str, rounds: usize) -> String {
-    let cups: LinkedList<usize> = input
-        .chars()
-        .map(|c| c.to_digit(10).unwrap() as usize)
-        .collect();
+    let start = input.chars().next().unwrap().to_digit(10).unwrap() as usize;
+    let mut cups = array_of_nexts(input);
 
-    let mut cups = crab_cups(cups, rounds);
+    crab_cups(start, &mut cups, rounds);
 
-    // Build a list running from the first entry _after_ 1 and round again
-    while cups.front().unwrap() != &1 {
-        let not_1 = cups.pop_front().unwrap();
-        cups.push_back(not_1);
-    }
-    cups.pop_front(); // Remove the 1
+    let mut next = cups[1];
     let mut out = String::new();
-    for c in cups.iter() {
-        out.push(std::char::from_digit(*c as u32, 10).unwrap());
+
+    while next != 1 {
+        out.push(std::char::from_digit(next as u32, 10).unwrap());
+        next = cups[next];
     }
 
     out
 }
 
 pub(crate) fn part_two(input: &str, rounds: usize, n_cups: usize) -> u64 {
-    let mut cups: LinkedList<usize> = input
+    let start = input.chars().next().unwrap().to_digit(10).unwrap() as usize;
+    let mut cups = array_of_nexts(input);
+
+    let mut next = cups.iter().max().unwrap() + 1;
+    let last = cups
+        .iter()
+        .enumerate()
+        .filter(|(_i, &x)| x == start)
+        .map(|(i, _x)| i)
+        .next()
+        .unwrap();
+    cups[last] = next;
+    next += 1;
+    while next <= n_cups {
+        cups.push(next);
+        next += 1;
+    }
+    cups.push(start);
+
+    crab_cups(start, &mut cups, rounds);
+
+    let next_after_one = cups[1];
+    let the_one_after_that = cups[next_after_one];
+    (next_after_one as u64) * (the_one_after_that as u64)
+}
+
+fn array_of_nexts(input: &str) -> Vec<usize> {
+    // Convert the input string (like "389125467") into an array
+    // where the entry at index i is the value of the cup next in
+    // order.  E.g. at index 3 would be the value 8.
+    // Index 0 exists but is unused (cup labels start at 1)
+    let cups: Vec<usize> = input
         .chars()
         .map(|c| c.to_digit(10).unwrap() as usize)
         .collect();
-    for next in cups.len()..n_cups {
-        cups.push_back(next + 1);
-    }
-
-    cups = crab_cups(cups, rounds);
-
-    // Lazily assume 1 isn't right at the end of the array
-    while cups.pop_front().unwrap() != 1 {}
-    (cups.pop_front().unwrap() as u64) * (cups.pop_front().unwrap() as u64)
-}
-
-pub(crate) fn crab_cups(mut cups: LinkedList<usize>, rounds: usize) -> LinkedList<usize> {
-    let cups: Vec<usize> = cups.iter().map(|x| *x).collect();
     let len = cups.len();
 
-    let mut current = cups[0];
-
-    // Initialize the vec - empty.  We won't use the 0th index, but we do want a slot for every other item in the input list.
-    let mut next_cups: Vec<usize> = vec![0];
-    for _ in cups.iter() { next_cups.push(0); }
+    let mut next_cups: Vec<usize> = vec![0; cups.len() + 1];
 
     for i in 0..len {
         let next_i = (i + 1) % len;
         next_cups[cups[i]] = cups[next_i];
     }
 
+    next_cups
+}
+
+pub(crate) fn crab_cups(start_cup: usize, cups: &mut Vec<usize>, rounds: usize) {
+    let len = cups.len() - 1;
+    let mut current = start_cup;
+
     for _i in 0..rounds {
         // The next three cups
-        let one = next_cups[current];
-        let two = next_cups[one];
-        let three = next_cups[two];
+        let one = cups[current];
+        let two = cups[one];
+        let three = cups[two];
 
-        let next_current = next_cups[three];
+        let next_current = cups[three];
         let destination = get_destination(current, one, two, three, len);
-        let next = next_cups[destination];
+        let next = cups[destination];
 
-        next_cups[destination] = one;
+        cups[destination] = one;
         // two and three are already in the right places
-        next_cups[three] = next;
-        next_cups[current] = next_current;
+        cups[three] = next;
+        cups[current] = next_current;
 
         current = next_current;
     }
-
-    let mut cups = LinkedList::new();
-    cups.push_back(1);
-    let mut next = next_cups[1];
-    loop {
-        if next == 1 {
-            break;
-        }
-        cups.push_back(next);
-        next = next_cups[next];
-    }
-
-    // println!("{:?}", next_cups);
-    // println!("{:?}", cups);
-    cups
 }
 
 fn get_destination(current: usize, one: usize, two: usize, three: usize, len: usize) -> usize {
@@ -134,16 +133,21 @@ mod tests {
         assert!(part_two("389254671", 0, 1_000_000) == 10 * 11);
     }
 
-    #[test]
+    // #[test]
     fn _time() {
         use std::time::Instant;
-        let all_turns = [30_000, 100_000]; //[1_000, 3_000, 10_000, 30_000];//, 3_000, 10_000]; // Linear on n-turns
-        let all_sizes = [1_000_000]; //[1_000, 10_000, 100_000];
+        let all_turns = [30_000, 100_000]; // Linear on n-turns
+        let all_sizes = [1_000_000]; // [1_000, 10_000, 100_000];
         for &turns in all_turns.iter() {
             for &size in all_sizes.iter() {
                 let start = Instant::now();
                 let _ = part_two("389254671", turns, size); //1_000_000);
-                println!("{:} turns at {:} size\t{:}", turns, size, start.elapsed().as_secs());
+                println!(
+                    "{:} turns at {:} size\t{:}",
+                    turns,
+                    size,
+                    start.elapsed().as_secs()
+                );
             }
         }
         assert!(false); // Show test output in stdout
