@@ -13,3 +13,4 @@ Most days run in well under 1s.  Some days are taking longer - could be interest
 | 17-2 |       | ~18s | Improvement: memoize the `get_neighbours` function.
 | 22-2 | ~60s  | 2.9s |
 | 23-2 | ~12s  | 1.6s | 
+| 24-2 |       | 135s | Not sure why this one is so slow
