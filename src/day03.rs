@@ -19,11 +19,11 @@ impl DayThree {
         DayThree::new("data/3a.txt")
     }
 
-    pub fn solve_one(&self) -> u32 {
+    pub fn solve_one(&self) -> u64 {
         self.solve_for_slope(3, 1)
     }
 
-    pub fn solve_two(&self) -> u32 {
+    pub fn solve_two(&self) -> u64 {
         let slopes = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
 
         slopes
@@ -31,7 +31,7 @@ impl DayThree {
             .fold(1, |acc, (x, y)| acc * self.solve_for_slope(*x, *y))
     }
 
-    fn solve_for_slope(&self, xstep: usize, ystep: usize) -> u32 {
+    fn solve_for_slope(&self, xstep: usize, ystep: usize) -> u64 {
         self.data
             .iter()
             .step_by(ystep)
